@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindFlow AI - Next-Gen Workspace</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js for Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f3ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#312e81',
+                            accent: '#a855f7',
+                            cyan: '#06b6d4',
+                            pink: '#ec4899',
+                        },
+                        dark: {
+                            bg: '#080c14',
+                            card: '#0f172a',
+                            border: '#1e293b',
+                            hover: '#1e293b'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace'],
+                    },
+                    boxShadow: {
+                        'neon': '0 0 20px -5px rgba(99, 102, 241, 0.4)',
+                        'neon-accent': '0 0 20px -5px rgba(168, 85, 247, 0.4)',
+                        'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #080c14;
+            color: #f3f4f6;
+            overflow-x: hidden;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #080c14;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4f46e5;
+        }
+
+        /* Glassmorphism Styles */
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-card {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            border-color: rgba(99, 102, 241, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.15);
+        }
+
+        /* Glowing Effects */
+        .glow-text {
+            text-shadow: 0 0 12px rgba(168, 85, 247, 0.6);
+        }
+
+        .glow-border {
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
+        }
+
+        /* Pulse Dot Animation */
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.1); }
+        }
+        .pulse-active {
+            animation: pulse-glow 2s infinite ease-in-out;
+        }
+
+        /* Typing Caret Animation */
+        .typing-cursor::after {
+            content: '▋';
+            animation: blink 1s infinite;
+            color: #a855f7;
+            margin-left: 2px;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* Drag & Drop Styling */
+        .dragging {
+            opacity: 0.4;
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-[#080c14] text-slate-100 antialiased selection:bg-brand-500 selection:text-white">
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <div class="flex h-screen overflow-hidden">
+        
+        <!-- SIDEBAR -->
+        <aside id="sidebar" class="w-64 glass-panel border-r border-slate-800 flex flex-col justify-between transition-all duration-300 z-30 relative shrink-0">
+            <div>
+                <!-- Brand Logo -->
+                <div class="h-16 flex items-center justify-between px-6 border-b border-slate-800/80">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-500 via-brand-accent to-brand-cyan flex items-center justify-center shadow-neon">
+                            <i class="fa-solid fa-brain text-white text-lg"></i>
+                        </div>
+                        <span class="font-extrabold text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-200 to-slate-400 brand-title">
+                            MindFlow<span class="text-brand-accent">.ai</span>
+                        </span>
+                    </div>
+                    <button id="toggle-sidebar-btn" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition">
+                        <i class="fa-solid fa-chevron-left text-sm"></i>
+                    </button>
+                </div>
+
+                <!-- Navigation Links -->
+                <nav class="p-4 space-y-1.5">
+                    <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider px-3 mb-2 nav-header">Core Apps</div>
+                    
+                    <button data-tab="dashboard" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition text-brand-500 bg-brand-500/10 border border-brand-500/20">
+                        <i class="fa-solid fa-chart-pie text-lg w-5"></i>
+                        <span class="nav-text">Dashboard</span>
+                    </button>
+
+                    <button data-tab="ai-studio" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/60 transition">
+                        <i class="fa-solid fa-wand-magic-sparkles text-lg text-brand-accent w-5"></i>
+                        <span class="nav-text">AI Text Studio</span>
+                    </button>
+
+                    <button data-tab="kanban" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/60 transition">
+                        <i class="fa-solid fa-list-check text-lg text-emerald-400 w-5"></i>
+                        <span class="nav-text">Task Kanban</span>
+                    </button>
+
+                    <button data-tab="code-assistant" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/60 transition">
+                        <i class="fa-solid fa-code text-lg text-brand-cyan w-5"></i>
+                        <span class="nav-text">Code Assistant</span>
+                    </button>
+
+                    <button data-tab="prompt-gen" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/60 transition">
+                        <i class="fa-solid fa-lightbulb text-lg text-amber-400 w-5"></i>
+                        <span class="nav-text">Prompt Lab</span>
+                    </button>
+
+                    <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider px-3 mt-6 mb-2 nav-header">System</div>
+
+                    <button data-tab="analytics" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/60 transition">
+                        <i class="fa-solid fa-chart-line text-lg text-pink-400 w-5"></i>
+                        <span class="nav-text">Usage & Metrics</span>
+                    </button>
+
+                    <button data-tab="settings" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/60 transition">
+                        <i class="fa-solid fa-gear text-lg text-slate-400 w-5"></i>
+                        <span class="nav-text">Settings API</span>
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Token Usage Card -->
+            <div class="p-4 m-3 rounded-2xl glass-card border border-slate-800/80 sidebar-token-card">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-semibold text-slate-300">Token Limit</span>
+                    <span class="text-xs text-brand-accent font-bold">78% Used</span>
+                </div>
+                <div class="w-full bg-slate-800 rounded-full h-2 mb-2 overflow-hidden">
+                    <div class="bg-gradient-to-r from-brand-500 to-brand-accent h-2 rounded-full w-[78%]"></div>
+                </div>
+                <p class="text-[11px] text-slate-400">78,450 / 100,000 Monthly Tokens</p>
+                <button class="w-full mt-3 py-1.5 px-3 bg-brand-500/20 hover:bg-brand-500/30 text-brand-100 border border-brand-500/30 text-xs font-semibold rounded-lg transition">
+                    Upgrade to Pro
+                </button>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT AREA -->
+        <main class="flex-1 flex flex-col h-screen overflow-y-auto bg-[#080c14] relative">
+            
+            <!-- TOP NAVBAR -->
+            <header class="h-16 glass-panel border-b border-slate-800 sticky top-0 z-20 px-6 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <!-- Model Selector -->
+                    <div class="relative">
+                        <select id="model-select" class="bg-slate-900/90 text-xs font-semibold text-slate-200 border border-slate-700/80 rounded-xl px-3.5 py-2 pr-8 appearance-none focus:outline-none focus:border-brand-500 cursor-pointer hover:border-slate-600 transition">
+                            <option value="gpt-4o">🤖 GPT-4o Turbo (Default)</option>
+                            <option value="gemini-ultra">✨ Gemini 1.5 Pro</option>
+                            <option value="claude-3-5">⚡ Claude 3.5 Sonnet</option>
+                            <option value="llama-3">🦙 Llama 3 70B</option>
+                        </select>
+                        <i class="fa-solid fa-chevron-down text-slate-400 text-xs absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                    </div>
+
+                    <!-- Live System Status Badge -->
+                    <div class="hidden md:flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 pulse-active"></span>
+                        Neural Engine Online
+                    </div>
+                </div>
+
+                <!-- Right Header Actions -->
+                <div class="flex items-center gap-4">
+                    <!-- Quick Search / Command -->
+                    <button onclick="showToast('Command Palette (Cmd+K) ready', 'info')" class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-400 hover:text-slate-200 hover:border-slate-700 transition">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <span>Search prompt templates...</span>
+                        <kbd class="px-1.5 py-0.5 text-[10px] bg-slate-800 rounded text-slate-400">⌘K</kbd>
+                    </button>
+
+                    <!-- Notifications -->
+                    <button class="relative p-2 text-slate-400 hover:text-white transition rounded-lg hover:bg-slate-800" onclick="showToast('You have 2 unread workspace updates', 'info')">
+                        <i class="fa-regular fa-bell text-lg"></i>
+                        <span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-brand-accent"></span>
+                    </button>
+
+                    <!-- User Profile Button -->
+                    <div class="flex items-center gap-3 pl-2 border-l border-slate-800">
+                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80" alt="Avatar" class="w-8 h-8 rounded-full border border-brand-accent/50 object-cover">
+                        <div class="hidden lg:block text-left">
+                            <div class="text-xs font-semibold text-slate-200">Alex Vance</div>
+                            <div class="text-[10px] text-brand-accent font-mono">Pro Creator</div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- TAB CONTENT CONTAINER -->
+            <div class="p-6 md:p-8 flex-1 max-w-7xl mx-auto w-full">
+                
+                <!-- TAB 1: DASHBOARD -->
+                <div id="tab-dashboard" class="tab-content space-y-6">
+                    <!-- Welcome Hero Banner -->
+                    <div class="relative overflow-hidden rounded-3xl p-8 glass-panel border border-brand-500/20 bg-gradient-to-r from-brand-900/40 via-slate-900/60 to-purple-950/30">
+                        <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-brand-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                        <div class="relative z-10 max-w-2xl">
+                            <span class="px-3 py-1 rounded-full text-xs font-semibold bg-brand-500/20 text-brand-100 border border-brand-500/30">
+                                ✨ MindFlow v2.4 Release
+                            </span>
+                            <h1 class="text-3xl md:text-4xl font-extrabold mt-3 text-white tracking-tight">
+                                Ready to amplify your creative intelligence?
+                            </h1>
+                            <p class="text-slate-300 mt-2 text-sm leading-relaxed">
+                                Seamlessly create high-converting marketing copy, execute code optimizations, and manage complex AI project workflows with real-time AI context.
+                            </p>
+                            <div class="mt-6 flex flex-wrap gap-3">
+                                <button onclick="switchTab('ai-studio')" class="px-5 py-2.5 bg-gradient-to-r from-brand-500 to-brand-accent hover:from-brand-600 hover:to-purple-600 text-white font-semibold rounded-xl text-sm shadow-neon transition flex items-center gap-2">
+                                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                                    New Generation
+                                </button>
+                                <button onclick="switchTab('kanban')" class="px-5 py-2.5 bg-slate-800/80 hover:bg-slate-800 text-slate-200 border border-slate-700 font-semibold rounded-xl text-sm transition flex items-center gap-2">
+                                    <i class="fa-solid fa-list-check"></i>
+                                    View Kanban Tasks
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Metric Cards Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="glass-card p-5 rounded-2xl">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-xs text-slate-400 font-medium">Total Words Generated</p>
+                                    <h3 class="text-2xl font-bold text-white mt-1" id="dash-words-count">124,850</h3>
+                                </div>
+                                <div class="p-2.5 rounded-xl bg-brand-500/10 text-brand-500">
+                                    <i class="fa-solid fa-file-word text-xl"></i>
+                                </div>
+                            </div>
+                            <div class="mt-3 flex items-center gap-1.5 text-xs text-emerald-400 font-medium">
+                                <i class="fa-solid fa-arrow-trend-up"></i>
+                                <span>+18.4% from last week</span>
+                            </div>
+                        </div>
+
+                        <div class="glass-card p-5 rounded-2xl">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-xs text-slate-400 font-medium">Productivity Index</p>
+                                    <h3 class="text-2xl font-bold text-white mt-1">94.8%</h3>
+                                </div>
+                                <div class="p-2.5 rounded-xl bg-brand-accent/10 text-brand-accent">
+                                    <i class="fa-solid fa-bolt text-xl"></i>
+                                </div>
+                            </div>
+                            <div class="mt-3 flex items-center gap-1.5 text-xs text-emerald-400 font-medium">
+                                <i class="fa-solid fa-arrow-trend-up"></i>
+                                <span>+4.2% efficiency boost</span>
+                            </div>
+                        </div>
+
+                        <div class="glass-card p-5 rounded-2xl">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-xs text-slate-400 font-medium">Active Tasks</p>
+                                    <h3 class="text-2xl font-bold text-white mt-1" id="dash-active-tasks">8</h3>
+                                </div>
+                                <div class="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400">
+                                    <i class="fa-solid fa-list-check text-xl"></i>
+                                </div>
+                            </div>
+                            <div class="mt-3 flex items-center gap-1.5 text-xs text-slate-400 font-medium">
+                                <span>3 tasks high priority</span>
+                            </div>
+                        </div>
+
+                        <div class="glass-card p-5 rounded-2xl">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-xs text-slate-400 font-medium">Estimated Hours Saved</p>
+                                    <h3 class="text-2xl font-bold text-white mt-1">42.5 hrs</h3>
+                                </div>
+                                <div class="p-2.5 rounded-xl bg-cyan-500/10 text-cyan-400">
+                                    <i class="fa-solid fa-clock text-xl"></i>
+                                </div>
+                            </div>
+                            <div class="mt-3 flex items-center gap-1.5 text-xs text-emerald-400 font-medium">
+                                <i class="fa-solid fa-arrow-trend-up"></i>
+                                <span>Saved $1,280 in dev cost</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Workspace Overview & Recent Drafts -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- Left 2 Cols: Activity Chart -->
+                        <div class="lg:col-span-2 glass-panel p-6 rounded-2xl border border-slate-800">
+                            <div class="flex items-center justify-between mb-4">
+                                <h2 class="text-base font-bold text-white flex items-center gap-2">
+                                    <i class="fa-solid fa-chart-area text-brand-500"></i> AI Generation Activity
+                                </h2>
+                                <span class="text-xs text-slate-400">Last 7 Days</span>
+                            </div>
+                            <div class="h-64 w-full">
+                                <canvas id="dashboardOverviewChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Right 1 Col: Quick Saved Drafts -->
+                        <div class="glass-panel p-6 rounded-2xl border border-slate-800 flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center justify-between mb-4">
+                                    <h2 class="text-base font-bold text-white flex items-center gap-2">
+                                        <i class="fa-solid fa-bookmark text-brand-accent"></i> Recent Drafts
+                                    </h2>
+                                    <button onclick="switchTab('ai-studio')" class="text-xs text-brand-500 hover:underline">View All</button>
+                                </div>
+                                <div id="recent-drafts-list" class="space-y-3">
+                                    <!-- Dynamic drafts inserted here -->
+                                </div>
+                            </div>
+                            <button onclick="quickGeneratePrompt()" class="w-full mt-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs text-slate-200 font-semibold rounded-xl border border-slate-700 transition flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-plus text-brand-accent"></i> Quick Brainstorm
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 2: AI TEXT STUDIO -->
+                <div id="tab-ai-studio" class="tab-content hidden space-y-6">
+                    <div class="flex flex-col lg:flex-row gap-6">
+                        <!-- Left Configuration & Input Box -->
+                        <div class="w-full lg:w-1/2 space-y-4">
+                            <div class="glass-panel p-6 rounded-2xl border border-slate-800 space-y-4">
+                                <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                                    <i class="fa-solid fa-wand-magic-sparkles text-brand-accent"></i> AI Prompt Studio
+                                </h2>
+
+                                <!-- Preset Templates Grid -->
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-400 mb-2">Select Template Preset</label>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <button onclick="applyTemplate('blog')" class="p-2.5 rounded-xl glass-card text-left text-xs font-medium text-slate-300 hover:text-white hover:border-brand-500 transition">
+                                            📝 Blog Post Outline
+                                        </button>
+                                        <button onclick="applyTemplate('social')" class="p-2.5 rounded-xl glass-card text-left text-xs font-medium text-slate-300 hover:text-white hover:border-brand-500 transition">
+                                            🚀 Viral Tech Tweet/Post
+                                        </button>
+                                        <button onclick="applyTemplate('email')" class="p-2.5 rounded-xl glass-card text-left text-xs font-medium text-slate-300 hover:text-white hover:border-brand-500 transition">
+                                            ✉️ Cold Pitch Email
+                                        </button>
+                                        <button onclick="applyTemplate('refactor')" class="p-2.5 rounded-xl glass-card text-left text-xs font-medium text-slate-300 hover:text-white hover:border-brand-500 transition">
+                                            ⚡ Code Optimizer Prompt
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Tone & Length Controls -->
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-400 mb-1">Tone</label>
+                                        <select id="studio-tone" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 focus:border-brand-500 outline-none">
+                                            <option value="Professional & Sharp">Professional & Sharp</option>
+                                            <option value="Casual & Conversational">Casual & Conversational</option>
+                                            <option value="Persuasive & High Converting">Persuasive Marketing</option>
+                                            <option value="Technical & Precise">Technical / Engineer</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-400 mb-1">Creativity (Temperature)</label>
+                                        <select id="studio-temp" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 focus:border-brand-500 outline-none">
+                                            <option value="0.7">Balanced (0.7)</option>
+                                            <option value="0.2">Precise & Strict (0.2)</option>
+                                            <option value="0.9">High Creativity (0.9)</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Text Prompt Input -->
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-400 mb-1">Your Detailed Prompt</label>
+                                    <textarea id="studio-prompt" rows="6" class="w-full bg-slate-900/90 border border-slate-800 rounded-xl p-3.5 text-sm text-slate-100 placeholder-slate-500 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none transition font-sans" placeholder="Describe what you want MindFlow AI to generate in detail..."></textarea>
+                                </div>
+
+                                <!-- Generate Button -->
+                                <button id="generate-btn" onclick="generateAIContent()" class="w-full py-3 bg-gradient-to-r from-brand-500 via-brand-accent to-purple-600 hover:opacity-95 text-white font-bold rounded-xl text-sm shadow-neon transition flex items-center justify-center gap-2">
+                                    <i class="fa-solid fa-sparkles"></i>
+                                    <span>Generate AI Output</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Right Output Screen -->
+                        <div class="w-full lg:w-1/2 flex flex-col">
+                            <div class="glass-panel p-6 rounded-2xl border border-slate-800 flex-1 flex flex-col justify-between">
+                                <div>
+                                    <!-- Output Header -->
+                                    <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-3 h-3 rounded-full bg-brand-accent animate-pulse"></span>
+                                            <h3 class="text-sm font-bold text-white">AI Streamed Response</h3>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <button onclick="copyGeneratedText()" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs text-slate-300 transition flex items-center gap-1.5 border border-slate-700">
+                                                <i class="fa-regular fa-copy"></i> Copy
+                                            </button>
+                                            <button onclick="saveCurrentDraft()" class="px-2.5 py-1 bg-brand-500/20 hover:bg-brand-500/30 text-brand-100 rounded-lg text-xs font-medium transition flex items-center gap-1.5 border border-brand-500/30">
+                                                <i class="fa-regular fa-bookmark"></i> Save Draft
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Stream Content Box -->
+                                    <div id="ai-output-box" class="mt-4 p-4 min-h-[320px] max-h-[480px] overflow-y-auto font-sans text-sm text-slate-200 leading-relaxed bg-slate-950/60 rounded-xl border border-slate-800/80">
+                                        <p class="text-slate-500 italic">Output will appear here after clicking "Generate AI Output"...</p>
+                                    </div>
+                                </div>
+
+                                <!-- Output Footer Stats -->
+                                <div class="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
+                                    <span id="output-word-count">Words: 0</span>
+                                    <span id="output-token-cost">Estimated Tokens: 0</span>
+                                    <span class="text-emerald-400 font-mono">Latency: 180ms</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 3: KANBAN TASK BOARD -->
+                <div id="tab-kanban" class="tab-content hidden space-y-6">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <h1 class="text-2xl font-bold text-white">Project Workflow Kanban</h1>
+                            <p class="text-xs text-slate-400">Organize and execute AI-driven workspace tasks seamlessly.</p>
+                        </div>
+                        <button onclick="openAddTaskModal()" class="px-4 py-2 bg-gradient-to-r from-brand-500 to-brand-accent hover:opacity-90 text-white font-semibold rounded-xl text-xs transition flex items-center gap-2 shadow-neon">
+                            <i class="fa-solid fa-plus"></i> Add New Task
+                        </button>
+                    </div>
+
+                    <!-- Kanban Columns Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <!-- Column 1: Backlog -->
+                        <div class="glass-panel p-4 rounded-2xl border border-slate-800/80 flex flex-col h-[600px]">
+                            <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-3">
+                                <span class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-slate-400"></span> Backlog
+                                </span>
+                                <span id="count-backlog" class="text-xs font-mono bg-slate-800 px-2 py-0.5 rounded text-slate-400">0</span>
+                            </div>
+                            <div id="col-backlog" class="kanban-col flex-1 space-y-3 overflow-y-auto pr-1" ondragover="allowDrop(event)" ondrop="dropTask(event, 'backlog')">
+                                <!-- Dynamic Cards -->
+                            </div>
+                        </div>
+
+                        <!-- Column 2: In Progress -->
+                        <div class="glass-panel p-4 rounded-2xl border border-slate-800/80 flex flex-col h-[600px]">
+                            <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-3">
+                                <span class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-amber-400"></span> In Progress
+                                </span>
+                                <span id="count-in-progress" class="text-xs font-mono bg-slate-800 px-2 py-0.5 rounded text-slate-400">0</span>
+                            </div>
+                            <div id="col-in-progress" class="kanban-col flex-1 space-y-3 overflow-y-auto pr-1" ondragover="allowDrop(event)" ondrop="dropTask(event, 'in-progress')">
+                                <!-- Dynamic Cards -->
+                            </div>
+                        </div>
+
+                        <!-- Column 3: AI Processing -->
+                        <div class="glass-panel p-4 rounded-2xl border border-slate-800/80 flex flex-col h-[600px]">
+                            <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-3">
+                                <span class="text-xs font-bold text-brand-accent uppercase tracking-wider flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-brand-accent pulse-active"></span> AI Processing
+                                </span>
+                                <span id="count-ai-processing" class="text-xs font-mono bg-slate-800 px-2 py-0.5 rounded text-slate-400">0</span>
+                            </div>
+                            <div id="col-ai-processing" class="kanban-col flex-1 space-y-3 overflow-y-auto pr-1" ondragover="allowDrop(event)" ondrop="dropTask(event, 'ai-processing')">
+                                <!-- Dynamic Cards -->
+                            </div>
+                        </div>
+
+                        <!-- Column 4: Done -->
+                        <div class="glass-panel p-4 rounded-2xl border border-slate-800/80 flex flex-col h-[600px]">
+                            <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-3">
+                                <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Completed
+                                </span>
+                                <span id="count-done" class="text-xs font-mono bg-slate-800 px-2 py-0.5 rounded text-slate-400">0</span>
+                            </div>
+                            <div id="col-done" class="kanban-col flex-1 space-y-3 overflow-y-auto pr-1" ondragover="allowDrop(event)" ondrop="dropTask(event, 'done')">
+                                <!-- Dynamic Cards -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 4: CODE ASSISTANT -->
+                <div id="tab-code-assistant" class="tab-content hidden space-y-6">
+                    <div class="glass-panel p-6 rounded-2xl border border-slate-800 space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                                    <i class="fa-solid fa-code text-brand-cyan"></i> Intelligent Code Refactor & Explainer
+                                </h2>
+                                <p class="text-xs text-slate-400 mt-0.5">Paste code below to generate optimized snippet refactors, fix bugs, or add comments.</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button onclick="runCodePreset('refactor')" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs text-slate-200 rounded-lg transition border border-slate-700">Clean & Refactor</button>
+                                <button onclick="runCodePreset('explain')" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs text-slate-200 rounded-lg transition border border-slate-700">Explain Code</button>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                            <!-- Code Input Area -->
+                            <div class="flex flex-col">
+                                <label class="text-xs font-semibold text-slate-400 mb-1">Source Code Input</label>
+                                <textarea id="code-input" rows="14" class="w-full bg-slate-950 font-mono text-xs text-cyan-300 p-4 rounded-xl border border-slate-800 focus:border-brand-cyan outline-none leading-relaxed" placeholder="// Paste JavaScript, Python, or HTML code here..."></textarea>
+                            </div>
+
+                            <!-- Code Output Preview -->
+                            <div class="flex flex-col">
+                                <div class="flex items-center justify-between mb-1">
+                                    <label class="text-xs font-semibold text-slate-400">AI Suggested Refactor Output</label>
+                                    <button onclick="copyCodeOutput()" class="text-xs text-brand-cyan hover:underline"><i class="fa-regular fa-copy"></i> Copy Code</button>
+                                </div>
+                                <div id="code-output" class="w-full h-full bg-slate-950 font-mono text-xs text-emerald-400 p-4 rounded-xl border border-slate-800 overflow-y-auto leading-relaxed">
+                                    <span class="text-slate-600">// Refactored output will display here...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 5: PROMPT LAB -->
+                <div id="tab-prompt-gen" class="tab-content hidden space-y-6">
+                    <div class="glass-panel p-6 rounded-2xl border border-slate-800 space-y-4">
+                        <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-lightbulb text-amber-400"></i> AI Prompt Enhancer Engine
+                        </h2>
+                        <p class="text-xs text-slate-400">Turn simple one-line ideas into highly structured, high-yield master system prompts.</p>
+                        
+                        <div class="flex gap-2">
+                            <input type="text" id="raw-prompt-input" placeholder="e.g. Write a marketing email for my SaaS product..." class="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-100 outline-none focus:border-brand-500">
+                            <button onclick="enhancePrompt()" class="px-6 py-3 bg-gradient-to-r from-amber-500 to-brand-accent hover:opacity-90 text-white font-bold rounded-xl text-sm transition shadow-neon">
+                                Enhance Prompt ✨
+                            </button>
+                        </div>
+
+                        <div id="enhanced-prompt-result" class="hidden p-5 rounded-xl bg-slate-950 border border-slate-800/80 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold text-amber-400 uppercase tracking-wider">Optimized Master Prompt</span>
+                                <button onclick="copyEnhancedPrompt()" class="text-xs text-slate-300 hover:text-white bg-slate-800 px-2.5 py-1 rounded border border-slate-700">Copy Master Prompt</button>
+                            </div>
+                            <div id="enhanced-prompt-text" class="text-xs font-mono text-slate-300 leading-relaxed whitespace-pre-wrap"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 6: ANALYTICS -->
+                <div id="tab-analytics" class="tab-content hidden space-y-6">
+                    <div class="glass-panel p-6 rounded-2xl border border-slate-800 space-y-6">
+                        <div>
+                            <h2 class="text-lg font-bold text-white">System Analytics & Resource Usage</h2>
+                            <p class="text-xs text-slate-400">Detailed overview of monthly API token consumption and productivity gains.</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div class="glass-card p-4 rounded-xl border border-slate-800">
+                                <h3 class="text-xs font-bold text-slate-300 mb-3">Token Usage Distribution by Model</h3>
+                                <div class="h-56">
+                                    <canvas id="analyticsDoughnutChart"></canvas>
+                                </div>
+                            </div>
+
+                            <div class="glass-card p-4 rounded-xl border border-slate-800">
+                                <h3 class="text-xs font-bold text-slate-300 mb-3">Monthly Cost Savings Comparison ($)</h3>
+                                <div class="h-56">
+                                    <canvas id="analyticsBarChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 7: SETTINGS -->
+                <div id="tab-settings" class="tab-content hidden space-y-6">
+                    <div class="glass-panel p-6 rounded-2xl border border-slate-800 max-w-2xl space-y-6">
+                        <h2 class="text-lg font-bold text-white">API Keys & Workspace Settings</h2>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-400 mb-1">OpenAI API Key</label>
+                                <input type="password" value="sk-proj-9812379812379812739182379" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-300 outline-none focus:border-brand-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-400 mb-1">Anthropic API Key</label>
+                                <input type="password" value="sk-ant-12938102938102938" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-300 outline-none focus:border-brand-500">
+                            </div>
+                            <div class="flex items-center justify-between pt-2">
+                                <div>
+                                    <span class="text-sm font-semibold text-white block">Auto-Save Generated Output</span>
+                                    <span class="text-xs text-slate-400">Save draft automatically to local workspace cache.</span>
+                                </div>
+                                <input type="checkbox" checked class="w-4 h-4 text-brand-500 accent-brand-500 rounded cursor-pointer">
+                            </div>
+                            <button onclick="showToast('Settings successfully updated!', 'success')" class="px-5 py-2.5 bg-brand-500 hover:bg-brand-600 text-white font-semibold rounded-xl text-xs transition">Save Settings</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- ADD TASK MODAL -->
+    <div id="add-task-modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="glass-panel border border-slate-800 rounded-2xl p-6 w-full max-w-md space-y-4">
+            <div class="flex items-center justify-between">
+                <h3 class="text-base font-bold text-white">Create New Workspace Task</h3>
+                <button onclick="closeAddTaskModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div>
+                <label class="block text-xs text-slate-400 font-semibold mb-1">Task Title</label>
+                <input type="text" id="modal-task-title" placeholder="e.g. Write landing page copy for MindFlow AI" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-200 outline-none focus:border-brand-500">
+            </div>
+            <div>
+                <label class="block text-xs text-slate-400 font-semibold mb-1">Priority</label>
+                <select id="modal-task-priority" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-200 outline-none">
+                    <option value="High">🔴 High Priority</option>
+                    <option value="Medium" selected>🟡 Medium Priority</option>
+                    <option value="Low">🟢 Low Priority</option>
+                </select>
+            </div>
+            <div class="flex justify-end gap-2 pt-2">
+                <button onclick="closeAddTaskModal()" class="px-4 py-2 bg-slate-800 text-xs text-slate-300 rounded-xl font-medium">Cancel</button>
+                <button onclick="saveNewTask()" class="px-4 py-2 bg-brand-500 text-xs text-white rounded-xl font-semibold hover:bg-brand-600 transition">Save Task</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT APP LOGIC -->
+    <script>
+        // GLOBAL STATE & LOCAL STORAGE INITIALIZATION
+        let state = {
+            drafts: JSON.parse(localStorage.getItem('mf_drafts')) || [
+                { id: 1, title: 'SaaS Pitch Email', snippet: 'Subject: Accelerate your AI product pipeline...' },
+                { id: 2, title: 'React Hooks Refactor', snippet: 'const useAIStream = (prompt) => { ... }' }
+            ],
+            tasks: JSON.parse(localStorage.getItem('mf_tasks')) || [
+                { id: '1', title: 'Optimize OpenAI API latency', column: 'in-progress', priority: 'High' },
+                { id: '2', title: 'Write product blog post outline', column: 'backlog', priority: 'Medium' },
+                { id: '3', title: 'Generate high-converting ad copy', column: 'ai-processing', priority: 'High' },
+                { id: '4', title: 'Setup Stripe billing webhooks', column: 'done', priority: 'Low' }
+            ],
+            wordCount: parseInt(localStorage.getItem('mf_word_count')) || 124850,
+            isGenerating: false
+        };
+
+        // DOM LOAD INITIALIZATION
+        window.onload = function() {
+            initNavigation();
+            initCharts();
+            renderDrafts();
+            renderKanbanTasks();
+            setupSidebarToggle();
+        };
+
+        // NAVIGATION LOGIC
+        function initNavigation() {
+            const navBtns = document.querySelectorAll('.nav-btn');
+            navBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const tabName = btn.getAttribute('data-tab');
+                    switchTab(tabName);
+                });
+            });
+        }
+
+        function switchTab(tabName) {
+            // Update active sidebar state
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                const isCurrent = btn.getAttribute('data-tab') === tabName;
+                if (isCurrent) {
+                    btn.className = "nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition text-brand-500 bg-brand-500/10 border border-brand-500/20";
+                } else {
+                    btn.className = "nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/60 transition";
+                }
+            });
+
+            // Hide all tab contents and reveal selected
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            const activeTab = document.getElementById(`tab-${tabName}`);
+            if (activeTab) {
+                activeTab.classList.remove('hidden');
+            }
+        }
+
+        // SIDEBAR COLLAPSE TOGGLE
+        function setupSidebarToggle() {
+            const sidebar = document.getElementById('sidebar');
+            const toggleBtn = document.getElementById('toggle-sidebar-btn');
+            let isCollapsed = false;
+
+            toggleBtn.addEventListener('click', () => {
+                isCollapsed = !isCollapsed;
+                if (isCollapsed) {
+                    sidebar.classList.remove('w-64');
+                    sidebar.classList.add('w-20');
+                    document.querySelectorAll('.nav-text, .nav-header, .brand-title, .sidebar-token-card').forEach(el => el.classList.add('hidden'));
+                    toggleBtn.innerHTML = '<i class="fa-solid fa-chevron-right text-sm"></i>';
+                } else {
+                    sidebar.classList.remove('w-20');
+                    sidebar.classList.add('w-64');
+                    document.querySelectorAll('.nav-text, .nav-header, .brand-title, .sidebar-token-card').forEach(el => el.classList.remove('hidden'));
+                    toggleBtn.innerHTML = '<i class="fa-solid fa-chevron-left text-sm"></i>';
+                }
+            });
+        }
+
+        // TOAST NOTIFICATION SYSTEM
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const icon = type === 'success' ? 'fa-check-circle text-emerald-400' : 'fa-info-circle text-brand-cyan';
+            
+            toast.className = 'pointer-events-auto flex items-center gap-3 px-4 py-3 bg-slate-900/90 border border-slate-700/80 rounded-xl shadow-2xl backdrop-blur-md text-xs font-semibold text-slate-200 transition-all duration-300 transform translate-y-2 opacity-0';
+            toast.innerHTML = `<i class="fa-solid ${icon} text-base"></i><span>${message}</span>`;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // AI STREAMING SIMULATION
+        function generateAIContent() {
+            const prompt = document.getElementById('studio-prompt').value.trim();
+            const tone = document.getElementById('studio-tone').value;
+            const outputBox = document.getElementById('ai-output-box');
+
+            if (!prompt) {
+                showToast('Please enter a prompt first!', 'info');
+                return;
+            }
+
+            if (state.isGenerating) return;
+            state.isGenerating = true;
+
+            const btn = document.getElementById('generate-btn');
+            btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> MindFlow Neural Engine Stream Processing...`;
+
+            outputBox.innerHTML = '';
+            outputBox.classList.add('typing-cursor');
+
+            const mockResponses = [
+                `### **Strategic Plan & Copy**\n\n**Tone:** ${tone}\n\nHere is your requested content tailored for high performance:\n\n1. **Core Value Proposition:** Streamline your workflow with ultra-responsive AI intelligence designed for modern SaaS creators.\n\n2. **Key Capabilities:**\n- **Real-Time Synthesis:** Deliver insights with sub-200ms latency.\n- **Multi-Model Orchestration:** Switch between GPT-4o, Claude 3.5 Sonnet, and Gemini Pro effortlessly.\n\n> *“Automation is no longer a luxury; it is the fundamental core of next-generation product design.”*`,
+                `### **Execution Blueprint**\n\n- **Tone Applied:** ${tone}\n\nBased on your prompt: "${prompt.substring(0, 30)}..."\n\nHere is the optimal approach:\n\n\`\`\`javascript\n// MindFlow AI Stream Adapter\nasync function executeStream(prompt) {\n   const response = await fetch('/api/ai/stream', {\n       method: 'POST',\n       body: JSON.stringify({ prompt, tone: "${tone}" })\n   });\n   return response.body;\n}\n\`\`\`\n\nThis structure ensures maximum performance while retaining clean readability.`
+            ];
+
+            const fullText = mockResponses[Math.floor(Math.random() * mockResponses.length)];
+            let currentIndex = 0;
+
+            const timer = setInterval(() => {
+                if (currentIndex < fullText.length) {
+                    outputBox.innerText = fullText.substring(0, currentIndex + 1);
+                    currentIndex++;
+                    outputBox.scrollTop = outputBox.scrollHeight;
+                } else {
+                    clearInterval(timer);
+                    outputBox.classList.remove('typing-cursor');
+                    state.isGenerating = false;
+                    btn.innerHTML = `<i class="fa-solid fa-sparkles"></i> Generate AI Output`;
+                    
+                    // Update word stats
+                    const wordsCount = fullText.split(' ').length;
+                    document.getElementById('output-word-count').innerText = `Words: ${wordsCount}`;
+                    document.getElementById('output-token-cost').innerText = `Estimated Tokens: ${Math.floor(wordsCount * 1.3)}`;
+                    
+                    state.wordCount += wordsCount;
+                    localStorage.setItem('mf_word_count', state.wordCount);
+                    document.getElementById('dash-words-count').innerText = state.wordCount.toLocaleString();
+
+                    showToast('AI Generation Complete!', 'success');
+                }
+            }, 12);
+        }
+
+        // PRESET TEMPLATES
+        function applyTemplate(type) {
+            const promptBox = document.getElementById('studio-prompt');
+            if (type === 'blog') {
+                promptBox.value = "Write a comprehensive 5-section blog post outline about 'The Future of AI Workflows in 2026' with key takeaways and catchy subheadings.";
+            } else if (type === 'social') {
+                promptBox.value = "Create a viral Twitter thread (5 tweets) announcing our new developer tool, highlighting high performance, sleek UI, and instant automation.";
+            } else if (type === 'email') {
+                promptBox.value = "Draft a high-converting cold outreach email to CTOs pitching a top-tier AI productivity dashboard. Keep it concise, value-focused, and persuasive.";
+            } else if (type === 'refactor') {
+                promptBox.value = "Refactor a JavaScript function to support async/await, improve error handling with try/catch, and optimize variable scoping.";
+            }
+            showToast('Template applied!', 'info');
+        }
+
+        // COPY & SAVE DRAFTS
+        function copyGeneratedText() {
+            const text = document.getElementById('ai-output-box').innerText;
+            if (!text || text.includes('Output will appear here')) {
+                showToast('Nothing to copy yet!', 'info');
+                return;
+            }
+            navigator.clipboard.writeText(text);
+            showToast('Copied output to clipboard!', 'success');
+        }
+
+        function saveCurrentDraft() {
+            const text = document.getElementById('ai-output-box').innerText;
+            if (!text || text.includes('Output will appear here')) {
+                showToast('Generate content before saving draft!', 'info');
+                return;
+            }
+            const newDraft = {
+                id: Date.now(),
+                title: text.substring(0, 24) + '...',
+                snippet: text.substring(0, 60) + '...'
+            };
+            state.drafts.unshift(newDraft);
+            localStorage.setItem('mf_drafts', JSON.stringify(state.drafts));
+            renderDrafts();
+            showToast('Draft saved to local workspace!', 'success');
+        }
+
+        function renderDrafts() {
+            const container = document.getElementById('recent-drafts-list');
+            container.innerHTML = '';
+            state.drafts.slice(0, 3).forEach(draft => {
+                const item = document.createElement('div');
+                item.className = 'p-3 rounded-xl glass-card text-xs border border-slate-800 flex justify-between items-center';
+                item.innerHTML = `
+                    <div>
+                        <div class="font-semibold text-slate-200">${draft.title}</div>
+                        <div class="text-[10px] text-slate-400 truncate max-w-[180px]">${draft.snippet}</div>
+                    </div>
+                    <button onclick="deleteDraft(${draft.id})" class="text-slate-500 hover:text-red-400 p-1"><i class="fa-solid fa-trash"></i></button>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function deleteDraft(id) {
+            state.drafts = state.drafts.filter(d => d.id !== id);
+            localStorage.setItem('mf_drafts', JSON.stringify(state.drafts));
+            renderDrafts();
+            showToast('Draft removed', 'info');
+        }
+
+        // KANBAN DRAG & DROP LOGIC
+        function renderKanbanTasks() {
+            const cols = ['backlog', 'in-progress', 'ai-processing', 'done'];
+            cols.forEach(col => {
+                const container = document.getElementById(`col-${col}`);
+                const countBadge = document.getElementById(`count-${col}`);
+                const filteredTasks = state.tasks.filter(t => t.column === col);
+                
+                container.innerHTML = '';
+                countBadge.innerText = filteredTasks.length;
+
+                filteredTasks.forEach(task => {
+                    const badgeColor = task.priority === 'High' ? 'bg-red-500/20 text-red-400 border-red-500/30' : 'bg-amber-500/20 text-amber-400 border-amber-500/30';
+                    const card = document.createElement('div');
+                    card.className = 'glass-card p-3.5 rounded-xl cursor-grab border border-slate-800 space-y-2';
+                    card.setAttribute('draggable', 'true');
+                    card.setAttribute('ondragstart', `dragTask(event, '${task.id}')`);
+                    card.innerHTML = `
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] font-semibold px-2 py-0.5 rounded border ${badgeColor}">${task.priority} Priority</span>
+                            <button onclick="deleteTask('${task.id}')" class="text-slate-500 hover:text-red-400 text-xs"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                        <p class="text-xs font-medium text-slate-200">${task.title}</p>
+                    `;
+                    container.appendChild(card);
+                });
+            });
+
+            // Update Dashboard Active Tasks count
+            document.getElementById('dash-active-tasks').innerText = state.tasks.filter(t => t.column !== 'done').length;
+        }
+
+        function dragTask(ev, taskId) {
+            ev.dataTransfer.setData("taskId", taskId);
+        }
+
+        function allowDrop(ev) {
+            ev.preventDefault();
+        }
+
+        function dropTask(ev, targetCol) {
+            ev.preventDefault();
+            const taskId = ev.dataTransfer.getData("taskId");
+            const task = state.tasks.find(t => t.id === taskId);
+            if (task) {
+                task.column = targetCol;
+                localStorage.setItem('mf_tasks', JSON.stringify(state.tasks));
+                renderKanbanTasks();
+                showToast(`Task moved to ${targetCol.replace('-', ' ')}`, 'info');
+            }
+        }
+
+        function openAddTaskModal() {
+            document.getElementById('add-task-modal').classList.remove('hidden');
+        }
+
+        function closeAddTaskModal() {
+            document.getElementById('add-task-modal').classList.add('hidden');
+        }
+
+        function saveNewTask() {
+            const title = document.getElementById('modal-task-title').value.trim();
+            const priority = document.getElementById('modal-task-priority').value;
+
+            if (!title) {
+                showToast('Please enter task title', 'info');
+                return;
+            }
+
+            state.tasks.push({
+                id: Date.now().toString(),
+                title: title,
+                column: 'backlog',
+                priority: priority
+            });
+
+            localStorage.setItem('mf_tasks', JSON.stringify(state.tasks));
+            renderKanbanTasks();
+            closeAddTaskModal();
+            document.getElementById('modal-task-title').value = '';
+            showToast('New task added to Backlog!', 'success');
+        }
+
+        function deleteTask(id) {
+            state.tasks = state.tasks.filter(t => t.id !== id);
+            localStorage.setItem('mf_tasks', JSON.stringify(state.tasks));
+            renderKanbanTasks();
+            showToast('Task deleted', 'info');
+        }
+
+        // CODE ASSISTANT LOGIC
+        function runCodePreset(action) {
+            const codeInput = document.getElementById('code-input').value.trim();
+            const codeOutput = document.getElementById('code-output');
+
+            if (!codeInput) {
+                document.getElementById('code-input').value = `function processData(items){\n  let res = [];\n  for(var i=0; i<items.length; i++){\n    res.push(items[i]*2);\n  }\n  return res;\n}`;
+            }
+
+            codeOutput.innerHTML = `<span class="text-amber-400"><i class="fa-solid fa-spinner animate-spin"></i> Neural Code Refactoring in progress...</span>`;
+
+            setTimeout(() => {
+                if (action === 'refactor') {
+                    codeOutput.innerText = `// Refactored with Modern ES6+ & Map Optimization\nconst processData = (items = []) => {\n  if (!Array.isArray(items)) throw new Error("Invalid Input");\n  return items.map(item => item * 2);\n};`;
+                } else {
+                    codeOutput.innerText = `// Code Analysis:\n// 1. Time Complexity: O(n) - Single pass iteration\n// 2. Space Complexity: O(n) - Creates new result array\n// 3. Modern Alternative: Recommended to use Array.prototype.map() for declarative clarity.`;
+                }
+                showToast('Code optimization complete!', 'success');
+            }, 800);
+        }
+
+        function copyCodeOutput() {
+            const text = document.getElementById('code-output').innerText;
+            navigator.clipboard.writeText(text);
+            showToast('Code copied!', 'success');
+        }
+
+        // PROMPT LAB LOGIC
+        function enhancePrompt() {
+            const raw = document.getElementById('raw-prompt-input').value.trim();
+            if (!raw) {
+                showToast('Enter a basic idea to enhance!', 'info');
+                return;
+            }
+
+            const resultBox = document.getElementById('enhanced-prompt-result');
+            const resultText = document.getElementById('enhanced-prompt-text');
+
+            resultBox.classList.remove('hidden');
+            resultText.innerText = `[ROLE]: You are a world-class principal expert.\n[CONTEXT]: ${raw}\n[OUTPUT INSTRUCTIONS]:\n- Provide concise, actionable bullet points.\n- Eliminate fluff or conversational preamble.\n- Include code snippets or copy examples where applicable.\n- Maintain an authoritative tone.`;
+            showToast('Prompt Enhanced!', 'success');
+        }
+
+        function copyEnhancedPrompt() {
+            const text = document.getElementById('enhanced-prompt-text').innerText;
+            navigator.clipboard.writeText(text);
+            showToast('Master prompt copied!', 'success');
+        }
+
+        function quickGeneratePrompt() {
+            switchTab('ai-studio');
+            applyTemplate('blog');
+        }
+
+        // INITIALIZE CHART.JS CHARTS
+        function initCharts() {
+            // Dashboard Activity Line Chart
+            const ctxDash = document.getElementById('dashboardOverviewChart').getContext('2d');
+            new Chart(ctxDash, {
+                type: 'line',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{
+                        label: 'Tokens Generated',
+                        data: [12000, 19000, 15000, 25000, 22000, 30000, 28000],
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.15)',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#94a3b8' } },
+                        y: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#94a3b8' } }
+                    }
+                }
+            });
+
+            // Analytics Doughnut Chart
+            const ctxDoughnut = document.getElementById('analyticsDoughnutChart').getContext('2d');
+            new Chart(ctxDoughnut, {
+                type: 'doughnut',
+                data: {
+                    labels: ['GPT-4o', 'Claude 3.5', 'Gemini Pro', 'Llama 3'],
+                    datasets: [{
+                        data: [45, 25, 20, 10],
+                        backgroundColor: ['#6366f1', '#a855f7', '#06b6d4', '#ec4899'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8' } } }
+                }
+            });
+
+            // Analytics Bar Chart
+            const ctxBar = document.getElementById('analyticsBarChart').getContext('2d');
+            new Chart(ctxBar, {
+                type: 'bar',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Saved Dev Cost ($)',
+                        data: [800, 1200, 1400, 1900, 2400, 3100],
+                        backgroundColor: '#a855f7',
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { color: '#94a3b8' } },
+                        y: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#94a3b8' } }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
